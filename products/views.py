@@ -39,9 +39,17 @@ class ProductView(APIView):
         except Products.DoesNotExist:
             return Response({'error':'Product Not Found!'},status=status.HTTP_404_NOT_FOUND)
         
-    # def patch(self, request, pk):
-        
-        
+    def patch(self, request, pk):
+        try:  
+            product = Products.objects.get(id=pk)
+            serializer = ProductSerializer(instance=product,data=request.data,partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Products.DoesNotExist:
+            return Response({'error': 'Product Not Found!'}, status=status.HTTP_404_NOT_FOUND)
 class CategoryView(APIView):
     def get(self,request):
         category = Category.objects.all()
