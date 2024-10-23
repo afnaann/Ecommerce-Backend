@@ -9,6 +9,7 @@ from .serializers import CartAddSerializer, CartViewSerializer
 from .models import CartItem, Cart
 from users.models import CustomUser
 
+
 class CartView(APIView):
     def get(self, request, pk):
         user = get_object_or_404(CustomUser, id=pk)
@@ -28,7 +29,6 @@ class CartView(APIView):
         cart, created = Cart.objects.get_or_create(user=user)
         serializer = CartAddSerializer(data=request.data)
         if serializer.is_valid():
-            print(serializer.data)
             product_id = serializer.data["product"]
             quantity = serializer.data.get("quantity", 1)
             product = get_object_or_404(Products, id=product_id)
@@ -38,13 +38,17 @@ class CartView(APIView):
             if created:
                 cartItem.quantity = quantity
             else:
-                cartItem.quantity += quantity
-
+                if product.stock > cartItem.quantity:
+                    cartItem.quantity += quantity
+                else:
+                    return Response(
+                        {"update": "Product Is Out Of Stock!"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
             cartItem.save()
 
             response_serializer = CartViewSerializer(cartItem)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
@@ -59,12 +63,16 @@ class CartView(APIView):
             Cart_item = CartItem.objects.get(cart=cart, product=product)
 
             if quantity == 0:
-                print("what is happnign")
                 Cart_item.delete()
                 return Response(serializer.data)
             else:
-                Cart_item.quantity = quantity
-
+                if product.stock >= quantity:
+                    Cart_item.quantity = quantity
+                else:
+                    return Response(
+                        {"update": "Product Is Out Of Stock!"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
             Cart_item.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
