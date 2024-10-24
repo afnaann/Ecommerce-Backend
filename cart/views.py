@@ -8,24 +8,32 @@ from .serializers import CartAddSerializer, CartViewSerializer
 
 from .models import CartItem, Cart
 from users.models import CustomUser
-
+from rest_framework.permissions import IsAuthenticated
 
 class CartView(APIView):
+    permission_classes=[IsAuthenticated]
     def get(self, request, pk):
-        user = get_object_or_404(CustomUser, id=pk)
+        try:    
+            user = CustomUser.objects.get(id=pk)
+        except CustomUser.DoesNotExist:
+            return Response({'error':'User Does Not Exist'},status=status.HTTP_404_NOT_FOUND)
         try:
             cart = Cart.objects.get(user=user)
-            cartItems = CartItem.objects.filter(cart=cart)
-            serializer = CartViewSerializer(cartItems, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
         except Cart.DoesNotExist:
             return Response(
-                {"message": "Cart is empty", "cart": []},
+                {"msg": "Cart is empty", "cart": []},
                 status=status.HTTP_204_NO_CONTENT,
             )
+        cartItems = CartItem.objects.filter(cart=cart)
+        serializer = CartViewSerializer(cartItems, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, pk):
-        user = get_object_or_404(CustomUser, id=pk)
+        try:
+            user = CustomUser.objects.get(id=pk)
+        except CustomUser.DoesNotExist:
+            return Response({'error':'User Does Not Exist'},status=status.HTTP_404_NOT_FOUND)
+        
         cart, created = Cart.objects.get_or_create(user=user)
         serializer = CartAddSerializer(data=request.data)
         if serializer.is_valid():
@@ -52,19 +60,27 @@ class CartView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
-        user = get_object_or_404(CustomUser, id=pk)
-        cart = Cart.objects.get(user=user)
+        try:    
+            user = CustomUser.objects.get(id=pk)
+        except CustomUser.DoesNotExist:
+            return Response({'error':'User Does Not Exist'},status=status.HTTP_404_NOT_FOUND)
+        try: 
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            return Response({'error':'cart Does not Exist'},status=status.HTTP_404_NOT_FOUND)
         serializer = CartAddSerializer(data=request.data)
         if serializer.is_valid():
 
             product_id = serializer.data["product"]
             quantity = serializer.validated_data["quantity"]
             product = get_object_or_404(Products, id=product_id)
-            Cart_item = CartItem.objects.get(cart=cart, product=product)
-
+            try:
+                Cart_item = CartItem.objects.get(cart=cart, product=product)
+            except CartItem.DoesNotExist:
+                return Response({'error':'CartItem Does not Exist'})
             if quantity == 0:
                 Cart_item.delete()
-                return Response(serializer.data)
+                return Response({'msg':'item removed from the cart Successfully'},status=status.HTTP_204_NO_CONTENT)
             else:
                 if product.stock >= quantity:
                     Cart_item.quantity = quantity

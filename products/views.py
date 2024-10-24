@@ -14,16 +14,15 @@ class ProductView(APIView):
         if id is not None:
             try:
                 product = Products.objects.get(id=id)
-                serializer = ProductViewSerializer(product)
-                return Response(serializer.data)
             except Products.DoesNotExist:
                 return Response({"Error": "Product Not Found!"})
+            serializer = ProductViewSerializer(product)
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         else:
             products = Products.objects.all()
             serializer = ProductViewSerializer(products, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
 
-    # Tried to handle here, but here, the data is being taken from request.data
 
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
@@ -35,28 +34,28 @@ class ProductView(APIView):
     def delete(self, request, pk):
         try:
             product = Products.objects.get(id=pk)
-            product.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
         except Products.DoesNotExist:
             return Response(
                 {"error": "Product Not Found!"}, status=status.HTTP_404_NOT_FOUND
             )
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk):
         try:
             product = Products.objects.get(id=pk)
-            serializer = ProductSerializer(
-                instance=product, data=request.data, partial=True
-            )
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Products.DoesNotExist:
             return Response(
                 {"error": "Product Not Found!"}, status=status.HTTP_404_NOT_FOUND
             )
+        serializer = ProductSerializer(
+            instance=product, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryView(APIView):

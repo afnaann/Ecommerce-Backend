@@ -6,26 +6,31 @@ from lucida.permissions import IsStaff
 from .serializers import OrderViewSerializer, OrdersViewSerializer
 from orders.models import Order
 from users.models import CustomUser
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework import status
 
 class OrderView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        user = CustomUser.objects.get(id=pk)
+        try:    
+            user = CustomUser.objects.get(id=pk)
+        except CustomUser.DoesNotExist:
+            return Response({'error':'User Does Not Exist'},status=status.HTTP_404_NOT_FOUND)
+        
         orders = Order.objects.filter(user=user)
-
         serializer = OrderViewSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, id):
-        status = request.data.get("status")
-        order = Order.objects.get(id=id)
-        order.status = status
+        statuss = request.data.get("status")
+        try:
+            order = Order.objects.get(id=id)
+        except Order.DoesNotExist:
+            return Response({'error':'Order Id Does Not Exist'},status=status.HTTP_404_NOT_FOUND)
+        order.status = statuss
         order.save()
-        return Response({"msg": "success"})
+        return Response({"msg": "success"},status=status.HTTP_201_CREATED)
 
 
 class AllOrderView(APIView):
