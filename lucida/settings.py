@@ -1,12 +1,14 @@
 from datetime import timedelta
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Get the SECRET_KEY from the environment variable
-SECRET_KEY = 'django-insecure-(=zepufb8y&-n=$u7i=@y)8a0m3poox$*i+s&z8llx7xi7l-!d'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
-STRIPE_SECRET_KEY = "sk_test_51QAsuwKNzesb3usPXPnbnDxIr1Seg8YXxRWzRD7mYWc0lcQOK4MBXJAiuzXbbislaNWooVm8uPu4517GbipxoKRt00WQyji6PQ"
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
 SITE_URL = "http://localhost:5173"
 
@@ -16,7 +18,7 @@ SITE_URL = "http://localhost:5173"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -68,13 +70,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "lucida.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "lucida", 
-        "USER": "lucida", 
-        "PASSWORD": "lucida", 
-        "HOST": "localhost",  
-        "PORT": "5432", 
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 

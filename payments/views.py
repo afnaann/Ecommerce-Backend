@@ -14,7 +14,7 @@ from orders.models import Order, OrderItems
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
+    
 class StripeCheckoutView(APIView):
     def post(self, request):
         data = request.data
