@@ -1,14 +1,19 @@
-# Django #
+# Logs #
 *.log
+
+# Python cache #
 *.pot
 *.pyc
-/__pycache__/
+*/__pycache__/  
 
-local_settings.py
+# Django settings #
+# local_settings.py
 
 # Django migrations #
+*/migrations/  
+
+# Database #
 db.sqlite3
-*/migrations/
 
 # Environments #
 .env

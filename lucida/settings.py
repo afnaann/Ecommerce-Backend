@@ -1,12 +1,14 @@
 from datetime import timedelta
 from pathlib import Path
-from dotenv import load_dotenv
 import os
 
 
-load_dotenv(dotenv_path='../.env.local')
 # Get the SECRET_KEY from the environment variable
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-(=zepufb8y&-n=$u7i=@y)8a0m3poox$*i+s&z8llx7xi7l-!d'
+
+STRIPE_SECRET_KEY = "sk_test_51QAsuwKNzesb3usPXPnbnDxIr1Seg8YXxRWzRD7mYWc0lcQOK4MBXJAiuzXbbislaNWooVm8uPu4517GbipxoKRt00WQyji6PQ"
+
+SITE_URL = "http://localhost:5173"
 
 
 
@@ -68,10 +70,11 @@ WSGI_APPLICATION = "lucida.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv('DB_NAME'),
-        "USER": os.getenv('DB_USER'),
-        "PASSWORD": os.getenv('DB_PASSWORD'),
-        "HOST": os.getenv('DB_HOST'),
+        "NAME": "lucida", 
+        "USER": "lucida", 
+        "PASSWORD": "lucida", 
+        "HOST": "localhost",  
+        "PORT": "5432", 
     }
 }
 
@@ -90,9 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
-
-SITE_URL = os.getenv('SITE_URL')
 
 LANGUAGE_CODE = "en-us"
 
